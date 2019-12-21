@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>RecommendLDS</name>
+    </assembly>
+    <members>
+        <member name="M:RecommendLDS.GlobalFunAndVar.getMethodBase(System.Int32)">
+            <summary>
+            获得指定的MethodBase对象
+            </summary>
+            <param name="i">指定是属于谁的的方法</param>
+            <returns></returns>
+        </member>
+        <member name="M:RecommendLDS.GlobalFunAndVar.stopwatchBegin">
+            <summary>
+            监视代码运行时间开始
+            </summary>
+        </member>
+        <member name="M:RecommendLDS.GlobalFunAndVar.stopwatchEnd">
+            <summary>
+            监视代码运行时间结束
+            </summary>
+        </member>
+        <member name="M:RecommendLDS.GlobalFunAndVar.SqlDataAdapDS(System.String,System.Data.SqlClient.SqlConnection)">
+            <summary>
+            指定的sql查询并填充到DataSet返回
+            </summary>
+            <param name="sql">sql语句</param>
+            <param name="connection">SqlConnection</param>
+            <returns></returns>
+        </member>
+        <member name="M:RecommendLDS.GlobalFunAndVar.SqlCommandOperation(System.String,System.Data.SqlClient.SqlConnection)">
+            <summary>
+            使用Sqlcommand来对指定sql语句进行操作并返回操作的受影响数
+            </summary>
+            <param name="sql">sql语句</param>
+            <returns></returns>
+        </member>
+        <member name="M:RecommendLDS.RecommendBaseGood.#ctor(System.Data.DataTable,System.Boolean)">
+            <summary>
+            构造方法（数据初始化）
+            </summary>
+            <param name="dataTable">
+            第1列为userId 用户id,
+            第2列为goodId 物品id,
+            第3列为rating 评分,
+            </param>
+            <param name="isDeBug">是否打开调试（只用于输出构建的矩阵结果以及统计运行时间）</param>
+        </member>
+        <member name="M:RecommendLDS.RecommendBaseGood.init(System.Data.DataTable)">
+            <summary>
+            转化数据库中的数据
+            </summary>
+        </member>
+        <!-- 对于成员“M:RecommendLDS.RecommendBaseGood.Get_User_Goods_Matrix”忽略有格式错误的 XML 注释 -->
+        <member name="M:RecommendLDS.RecommendBaseGood.Get_Cooccurrence_Matrix(System.Int32)">
+            <summary>
+            构建物品与物品的同现矩阵二维数组并统计指定某个用户有记录的物品和无记录的物品
+            </summary>
+            思路：
+            同现矩阵是物品-物品的矩阵，表示同时购买过或喜欢过矩阵点[x,y](x,y分别表示一个物品)对应的两个物品的用户数
+            根据之前求得的用户->物品的倒排矩阵来构建物品与物品的同现矩阵
+            1、创建一个物品与物品同现矩阵的二维数组，行和列都表示good，所以此矩阵是一个方阵，因此这个二维数组就是int[goodsCount,goodsCount]
+            2、循环倒排矩阵的二维数组每一行
+            3、循环倒排矩阵的二维数组每一行中的每一列
+            4、如现在开始循环，从[0,0]坐标开始，则就把[0,0]的值与[0,1]、[0,2]、[0,3]、[0,4]、[0,5]的值进行逐个判断，
+               如果两个的值都为1，则说明此用户购买过或喜欢过这两个good的记录、现在就该将同现矩阵中的对应坐标值加1
+               那么这个对应坐标[x,y]是多少呢，x应该是此时循环倒排矩阵中列的值，y应该是对比坐标的y。
+               比如现在循环到[0,2],[0,2]与[0,4]的值都为1，则同现矩阵的对应坐标[2,4]值就加1
+               同现矩阵的对角线值是必定相等的，所以同现矩阵的对应坐标[4,2]值也应该加1（但是在实际使用中没有什么意义，只用到对角线一边的值,而且经我测试20万数据量，只赋值对角线一边，这个方法代码效率提高三分之一）
+            循环完毕后就得到了物品与物品的同现矩阵二维数组
+            <returns></returns>
+        </member>
+        <member name="M:RecommendLDS.RecommendBaseGood.Get_Cooccurrence_Matrix1">
+            <summary>
+            构建物品与物品的同现矩阵二维数组并统计所有用户有记录的物品和无记录的物品
+            </summary>
+            思路：
+            同现矩阵是物品-物品的矩阵，表示同时购买过或喜欢过矩阵点[x,y](x,y分别表示一个物品)对应的两个物品的用户数
+            根据之前求得的用户->物品的倒排矩阵来构建物品与物品的同现矩阵
+            1、创建一个物品与物品同现矩阵的二维数组，行和列都表示good，所以此矩阵是一个方阵，因此这个二维数组就是int[goodsCount,goodsCount]
+            2、循环倒排矩阵的二维数组每一行
+            3、循环倒排矩阵的二维数组每一行中的每一列
+            4、如现在开始循环，从[0,0]坐标开始，则就把[0,0]的值与[0,1]、[0,2]、[0,3]、[0,4]、[0,5]的值进行逐个判断，
+               如果两个的值都为1，则说明此用户购买过或喜欢过这两个good的记录、现在就该将同现矩阵中的对应坐标值加1
+               那么这个对应坐标[x,y]是多少呢，x应该是此时循环倒排矩阵中列的值，y应该是对比坐标的y。
+               比如现在循环到[0,2],[0,2]与[0,4]的值都为1，则同现矩阵的对应坐标[2,4]值就加1
+               同现矩阵的对角线值是必定相等的，所以同现矩阵的对应坐标[4,2]值也应该加1（但是在实际使用中没有什么意义，只用到对角线一边的值,而且经我测试20万数据量，只赋值对角线一边，这个方法代码效率提高三分之一）
+            循环完毕后就得到了物品与物品的同现矩阵二维数组
+            <returns></returns>
+        </member>
+        <member name="M:RecommendLDS.RecommendBaseGood.Get_Cosine_Similar_Matrix">
+            <summary>
+            构建物品之间的余弦相似矩阵二维数组
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:RecommendLDS.RecommendBaseGood.Get_SimilarityByUser(System.Int32)">
+            <summary>
+            为某个具体用户计算预测兴趣度
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:RecommendLDS.RecommendBaseGood.Get_SimilarityAllUser">
+            <summary>
+            为所有用户计算预测兴趣度
+            </summary>
+            <returns>key：用户id，value：(key:物品id，推荐度) </returns>
+        </member>
+        <member name="M:RecommendLDS.RecommendBaseGood.OutPutArray``1(``0[0:,0:])">
+            <summary>
+            输出指定的二维数组
+            </summary>
+            <param name="array"></param>
+        </member>
+    </members>
+</doc>
